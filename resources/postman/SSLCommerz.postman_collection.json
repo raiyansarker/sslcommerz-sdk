@@ -1,0 +1,866 @@
+{
+  "info": {
+    "_postman_id": "09bb2a41-666e-4287-adfe-a8f268d5e802",
+    "name": "SSLCommerz Payment Gateway API",
+    "description": "Complete SSLCommerz payment gateway integration with sandbox testing\n\n### A. Correct Payment Flow\n\n1. Initialize Payment Session  \n    (You already did this. You get sessionkey, tran_id, and GatewayPageURL.)\n    \n2. Redirect the User to GatewayPageURL  \n    \\- The user must complete the payment on the SSLCommerz page.\n    \n3. After Payment Completion  \n    \\- SSLCommerz will call your success_url, fail_url, or cancel_url (as provided in your request).  \n    \\- You will receive a val_id or sessionkey in the callback.\n    \n4. Validate the Payment  \n    \\- Now, use the val_id or sessionkey you received in the callback to validate the payment.  \n    \\- Only after the payment is completed will the validation endpoint return a valid transaction.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "22880749"
+  },
+  "item": [
+    {
+      "name": "Payment Session",
+      "item": [
+        {
+          "name": "Debug - Test Store Credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Debug response",
+                  "console.log('Response Status:', pm.response.code);",
+                  "",
+                  "// Check if response is HTML (error page) or JSON",
+                  "var contentType = pm.response.headers.get('content-type');",
+                  "console.log('Content-Type:', contentType);",
+                  "",
+                  "if (contentType && contentType.includes('application/json')) {",
+                  "    var jsonData = pm.response.json();",
+                  "    console.log('JSON Response:', JSON.stringify(jsonData, null, 2));",
+                  "    ",
+                  "    // Test results",
+                  "    pm.test('Status code is 200', function () {",
+                  "        pm.response.to.have.status(200);",
+                  "    });",
+                  "    ",
+                  "    if (jsonData.status === 'SUCCESS') {",
+                  "        pm.test('✅ SSLCommerz connection successful', function () {",
+                  "            pm.expect(jsonData.status).to.eql('SUCCESS');",
+                  "        });",
+                  "        console.log('✅ SUCCESS: SSLCommerz is working properly!');",
+                  "        console.log('Session Key:', jsonData.sessionkey);",
+                  "        console.log('Gateway URL:', jsonData.GatewayPageURL);",
+                  "    } else {",
+                  "        pm.test('❌ SSLCommerz connection failed', function () {",
+                  "            pm.expect(jsonData.status).to.eql('SUCCESS');",
+                  "        });",
+                  "        console.log('❌ FAILED: ' + jsonData.failedreason);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Non-JSON Response (likely HTML error page)');",
+                  "    console.log('Response Body:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "store_id",
+                  "value": "{{store_id}}",
+                  "description": "Store ID provided by SSLCommerz"
+                },
+                {
+                  "key": "store_passwd",
+                  "value": "{{store_password}}",
+                  "description": "Store Password provided by SSLCommerz"
+                },
+                {
+                  "key": "total_amount",
+                  "value": "10.00",
+                  "description": "Minimum test amount"
+                },
+                {
+                  "key": "currency",
+                  "value": "BDT",
+                  "description": "Currency code"
+                },
+                {
+                  "key": "tran_id",
+                  "value": "DEBUG_{{$timestamp}}",
+                  "description": "Debug transaction ID"
+                },
+                {
+                  "key": "success_url",
+                  "value": "https://httpbin.org/post",
+                  "description": "Valid test success URL"
+                },
+                {
+                  "key": "fail_url",
+                  "value": "https://httpbin.org/post",
+                  "description": "Valid test fail URL"
+                },
+                {
+                  "key": "cancel_url",
+                  "value": "https://httpbin.org/post",
+                  "description": "Valid test cancel URL"
+                },
+                {
+                  "key": "cus_name",
+                  "value": "Test Customer",
+                  "description": "Customer name"
+                },
+                {
+                  "key": "cus_email",
+                  "value": "test@example.com",
+                  "description": "Customer email"
+                },
+                {
+                  "key": "cus_add1",
+                  "value": "Test Address",
+                  "description": "Customer address"
+                },
+                {
+                  "key": "cus_city",
+                  "value": "Dhaka",
+                  "description": "Customer city"
+                },
+                {
+                  "key": "cus_country",
+                  "value": "Bangladesh",
+                  "description": "Customer country"
+                },
+                {
+                  "key": "cus_phone",
+                  "value": "01700000000",
+                  "description": "Customer phone"
+                },
+                {
+                  "key": "cus_postcode",
+                  "value": "1000",
+                  "description": "Customer postcode"
+                },
+                {
+                  "key": "product_name",
+                  "value": "Test Product",
+                  "description": "Product name"
+                },
+                {
+                  "key": "product_category",
+                  "value": "General",
+                  "description": "Product category"
+                },
+                {
+                  "key": "product_profile",
+                  "value": "general",
+                  "description": "Product profile"
+                },
+                {
+                  "key": "shipping_method",
+                  "value": "NO",
+                  "description": "Shipping method - YES or NO"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url_sandbox}}/gwprocess/v4/api.php",
+              "host": [
+                "{{base_url_sandbox}}"
+              ],
+              "path": [
+                "gwprocess",
+                "v4",
+                "api.php"
+              ]
+            },
+            "description": "Debug request to test store credentials and basic setup"
+          },
+          "response": []
+        },
+        {
+          "name": "Initialize Payment Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test for successful response",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Parse response and save session key",
+                  "var jsonData = pm.response.json();",
+                  "console.log('Full Response:', JSON.stringify(jsonData, null, 2));",
+                  "",
+                  "if (jsonData.status === 'SUCCESS') {",
+                  "    pm.globals.set('sessionkey', jsonData.sessionkey);",
+                  "    pm.globals.set('gateway_page_url', jsonData.GatewayPageURL);",
+                  "    console.log('Session Key:', jsonData.sessionkey);",
+                  "    console.log('Gateway URL:', jsonData.GatewayPageURL);",
+                  "} else {",
+                  "    console.log('Error Status:', jsonData.status);",
+                  "    console.log('Error Message:', jsonData.failedreason);",
+                  "}",
+                  "",
+                  "pm.test('Payment session created successfully', function () {",
+                  "    pm.expect(jsonData.status).to.eql('SUCCESS');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "store_id",
+                  "value": "{{store_id}}",
+                  "description": "Store ID provided by SSLCommerz"
+                },
+                {
+                  "key": "store_passwd",
+                  "value": "{{store_password}}",
+                  "description": "Store Password provided by SSLCommerz"
+                },
+                {
+                  "key": "total_amount",
+                  "value": "1000.00",
+                  "description": "Total amount to be paid"
+                },
+                {
+                  "key": "currency",
+                  "value": "BDT",
+                  "description": "Currency code (BDT for Bangladesh)"
+                },
+                {
+                  "key": "tran_id",
+                  "value": "{{tran_id}}",
+                  "description": "Unique transaction ID"
+                },
+                {
+                  "key": "success_url",
+                  "value": "https://www.zatiqeasy.com/",
+                  "description": "Success callback URL - Use valid accessible URL"
+                },
+                {
+                  "key": "fail_url",
+                  "value": "https://example.com/fail",
+                  "description": "Failure callback URL - Use valid accessible URL"
+                },
+                {
+                  "key": "cancel_url",
+                  "value": "https://example.com/cancel",
+                  "description": "Cancel callback URL - Use valid accessible URL"
+                },
+                {
+                  "key": "ipn_url",
+                  "value": "https://example.com/ipn",
+                  "description": "IPN callback URL - Use valid accessible URL"
+                },
+                {
+                  "key": "cus_name",
+                  "value": "Test Customer",
+                  "description": "Customer name"
+                },
+                {
+                  "key": "cus_email",
+                  "value": "test@example.com",
+                  "description": "Customer email"
+                },
+                {
+                  "key": "cus_add1",
+                  "value": "Test Address",
+                  "description": "Customer address"
+                },
+                {
+                  "key": "cus_city",
+                  "value": "Dhaka",
+                  "description": "Customer city"
+                },
+                {
+                  "key": "cus_country",
+                  "value": "Bangladesh",
+                  "description": "Customer country"
+                },
+                {
+                  "key": "cus_phone",
+                  "value": "01700000000",
+                  "description": "Customer phone"
+                },
+                {
+                  "key": "cus_postcode",
+                  "value": "1000",
+                  "description": "Customer postcode"
+                },
+                {
+                  "key": "shipping_method",
+                  "value": "NO",
+                  "description": "Shipping method"
+                },
+                {
+                  "key": "product_name",
+                  "value": "Test Product",
+                  "description": "Product name"
+                },
+                {
+                  "key": "product_category",
+                  "value": "General",
+                  "description": "Product category"
+                },
+                {
+                  "key": "product_profile",
+                  "value": "general",
+                  "description": "Product profile"
+                },
+                {
+                  "key": "multi_card_name",
+                  "value": "mastercard,visacard,amexcard",
+                  "description": "Allowed card types"
+                },
+                {
+                  "key": "value_a",
+                  "value": "zatiq_ref_001",
+                  "description": "Additional reference value"
+                },
+                {
+                  "key": "value_b",
+                  "value": "zatiq_ref_002",
+                  "description": "Additional reference value"
+                },
+                {
+                  "key": "value_c",
+                  "value": "zatiq_ref_003",
+                  "description": "Additional reference value"
+                },
+                {
+                  "key": "value_d",
+                  "value": "zatiq_ref_004",
+                  "description": "Additional reference value"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url_sandbox}}/gwprocess/v4/api.php",
+              "host": [
+                "{{base_url_sandbox}}"
+              ],
+              "path": [
+                "gwprocess",
+                "v4",
+                "api.php"
+              ]
+            },
+            "description": "Initialize payment session with SSLCommerz"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment Validation",
+      "item": [
+        {
+          "name": "Validate Payment by Transaction ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Validation response received', function () {",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});",
+                  "",
+                  "if (jsonData.status === 'VALID') {",
+                  "    console.log('Payment is valid');",
+                  "    console.log('Transaction ID:', jsonData.tran_id);",
+                  "    console.log('Amount:', jsonData.amount);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_sandbox}}/validator/api/validationserverAPI.php?val_id={{sessionkey}}&store_id={{store_id}}&store_passwd={{store_password}}&format=json",
+              "host": [
+                "{{base_url_sandbox}}"
+              ],
+              "path": [
+                "validator",
+                "api",
+                "validationserverAPI.php"
+              ],
+              "query": [
+                {
+                  "key": "val_id",
+                  "value": "{{sessionkey}}",
+                  "description": "Session key from payment initialization"
+                },
+                {
+                  "key": "store_id",
+                  "value": "{{store_id}}",
+                  "description": "Store ID"
+                },
+                {
+                  "key": "store_passwd",
+                  "value": "{{store_password}}",
+                  "description": "Store Password"
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "description": "Response format"
+                }
+              ]
+            },
+            "description": "Validate payment using session key"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Payment by Session Key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Session validation response received', function () {",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});",
+                  "",
+                  "console.log('Session validation result:', jsonData.status);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_sandbox}}/validator/api/validationserverAPI.php?sessionkey={{sessionkey}}&store_id={{store_id}}&store_passwd={{store_password}}&format=json",
+              "host": [
+                "{{base_url_sandbox}}"
+              ],
+              "path": [
+                "validator",
+                "api",
+                "validationserverAPI.php"
+              ],
+              "query": [
+                {
+                  "key": "sessionkey",
+                  "value": "{{sessionkey}}",
+                  "description": "Session key from payment initialization"
+                },
+                {
+                  "key": "store_id",
+                  "value": "{{store_id}}",
+                  "description": "Store ID"
+                },
+                {
+                  "key": "store_passwd",
+                  "value": "{{store_password}}",
+                  "description": "Store Password"
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "description": "Response format"
+                }
+              ]
+            },
+            "description": "Validate payment using session key"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transaction Management",
+      "item": [
+        {
+          "name": "Transaction Query by Transaction ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Transaction query response received', function () {",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});",
+                  "",
+                  "console.log('Transaction Status:', jsonData.status);",
+                  "if (jsonData.element && jsonData.element.length > 0) {",
+                  "    console.log('Transaction Details:', jsonData.element[0]);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_sandbox}}/validator/api/merchantTransIDvalidationAPI.php?tran_id={{tran_id}}&store_id={{store_id}}&store_passwd={{store_password}}&format=json",
+              "host": [
+                "{{base_url_sandbox}}"
+              ],
+              "path": [
+                "validator",
+                "api",
+                "merchantTransIDvalidationAPI.php"
+              ],
+              "query": [
+                {
+                  "key": "tran_id",
+                  "value": "{{tran_id}}",
+                  "description": "Transaction ID"
+                },
+                {
+                  "key": "store_id",
+                  "value": "{{store_id}}",
+                  "description": "Store ID"
+                },
+                {
+                  "key": "store_passwd",
+                  "value": "{{store_password}}",
+                  "description": "Store Password"
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "description": "Response format"
+                }
+              ]
+            },
+            "description": "Query transaction status by transaction ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Refund Transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Refund response received', function () {",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});",
+                  "",
+                  "console.log('Refund Status:', jsonData.status);",
+                  "if (jsonData.refund_ref_id) {",
+                  "    pm.globals.set('refund_ref_id', jsonData.refund_ref_id);",
+                  "    console.log('Refund Reference ID:', jsonData.refund_ref_id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "refund_amount",
+                  "value": "100.00",
+                  "description": "Amount to refund"
+                },
+                {
+                  "key": "refund_remarks",
+                  "value": "Customer requested refund",
+                  "description": "Refund remarks"
+                },
+                {
+                  "key": "bank_tran_id",
+                  "value": "{{bank_tran_id}}",
+                  "description": "Bank transaction ID from successful payment"
+                },
+                {
+                  "key": "refe_id",
+                  "value": "{{tran_id}}",
+                  "description": "Reference transaction ID"
+                },
+                {
+                  "key": "store_id",
+                  "value": "{{store_id}}",
+                  "description": "Store ID"
+                },
+                {
+                  "key": "store_passwd",
+                  "value": "{{store_password}}",
+                  "description": "Store Password"
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "description": "Response format"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url_sandbox}}/validator/api/merchantTransIDvalidationAPI.php",
+              "host": [
+                "{{base_url_sandbox}}"
+              ],
+              "path": [
+                "validator",
+                "api",
+                "merchantTransIDvalidationAPI.php"
+              ]
+            },
+            "description": "Initiate refund for a transaction"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Testing & Utilities",
+      "item": [
+        {
+          "name": "Test Connection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains expected fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});",
+                  "",
+                  "console.log('SSLCommerz connection test completed');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "store_id",
+                  "value": "{{store_id}}",
+                  "description": "Store ID"
+                },
+                {
+                  "key": "store_passwd",
+                  "value": "{{store_password}}",
+                  "description": "Store Password"
+                },
+                {
+                  "key": "total_amount",
+                  "value": "10.00",
+                  "description": "Test amount"
+                },
+                {
+                  "key": "currency",
+                  "value": "BDT",
+                  "description": "Currency"
+                },
+                {
+                  "key": "tran_id",
+                  "value": "TEST_{{timestamp}}",
+                  "description": "Test transaction ID"
+                },
+                {
+                  "key": "success_url",
+                  "value": "https://zatiq.com/test/success",
+                  "description": "Test success URL"
+                },
+                {
+                  "key": "fail_url",
+                  "value": "https://zatiq.com/test/fail",
+                  "description": "Test fail URL"
+                },
+                {
+                  "key": "cancel_url",
+                  "value": "https://zatiq.com/test/cancel",
+                  "description": "Test cancel URL"
+                },
+                {
+                  "key": "cus_name",
+                  "value": "Test Customer",
+                  "description": "Test customer name"
+                },
+                {
+                  "key": "cus_email",
+                  "value": "test@zatiq.com",
+                  "description": "Test customer email"
+                },
+                {
+                  "key": "cus_add1",
+                  "value": "Test Address",
+                  "description": "Test address"
+                },
+                {
+                  "key": "cus_city",
+                  "value": "Dhaka",
+                  "description": "Test city"
+                },
+                {
+                  "key": "cus_country",
+                  "value": "Bangladesh",
+                  "description": "Test country"
+                },
+                {
+                  "key": "cus_phone",
+                  "value": "01700000000",
+                  "description": "Test phone"
+                },
+                {
+                  "key": "shipping_method",
+                  "value": "NO",
+                  "description": "Shipping method"
+                },
+                {
+                  "key": "product_name",
+                  "value": "Test Product",
+                  "description": "Test product"
+                },
+                {
+                  "key": "product_category",
+                  "value": "Test",
+                  "description": "Test category"
+                },
+                {
+                  "key": "product_profile",
+                  "value": "general",
+                  "description": "Product profile"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url_sandbox}}/gwprocess/v4/api.php",
+              "host": [
+                "{{base_url_sandbox}}"
+              ],
+              "path": [
+                "gwprocess",
+                "v4",
+                "api.php"
+              ]
+            },
+            "description": "Test SSLCommerz connection and credentials"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set timestamp for unique transaction ID",
+          "pm.globals.set('timestamp', Date.now());",
+          "",
+          "// Generate unique transaction ID",
+          "pm.globals.set('tran_id', 'ZATIQ_' + pm.globals.get('timestamp'));"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url_sandbox",
+      "value": "https://sandbox.sslcommerz.com",
+      "type": "string"
+    },
+    {
+      "key": "base_url_live",
+      "value": "https://securepay.sslcommerz.com",
+      "type": "string"
+    },
+    {
+      "key": "store_id",
+      "value": "{{your_store_id}}",
+      "type": "string"
+    },
+    {
+      "key": "store_password",
+      "value": "{{your_store_password}}",
+      "type": "string"
+    },
+    {
+      "key": "success_url",
+      "value": "https://zatiq.com/payment/success",
+      "type": "string"
+    },
+    {
+      "key": "fail_url",
+      "value": "https://zatiq.com/payment/fail",
+      "type": "string"
+    },
+    {
+      "key": "cancel_url",
+      "value": "https://zatiq.com/payment/cancel",
+      "type": "string"
+    },
+    {
+      "key": "ipn_url",
+      "value": "https://zatiq.com/payment/ipn",
+      "type": "string"
+    }
+  ]
+}
