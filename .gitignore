@@ -1,0 +1,5 @@
+/vendor/
+.phpunit.result.cache
+composer.lock
+phpstan-baseline.neon
+.DS_Store
