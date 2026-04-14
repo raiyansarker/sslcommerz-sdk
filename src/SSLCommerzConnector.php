@@ -48,11 +48,8 @@ class SSLCommerzConnector extends Connector
      * @param bool $isSandbox Whether to use the sandbox (test) or live environment.
      */
     public function __construct(
-        /** @var string */
         protected string $storeId,
-        /** @var string */
         protected string $storePassword,
-        /** @var bool */
         protected bool $isSandbox = true,
     ) {}
 
@@ -181,25 +178,6 @@ class SSLCommerzConnector extends Connector
         ];
     }
 
-    /**
-     * Define default headers for all requests.
-     *
-     * SSLCommerz typically requires form-urlencoded content for many operations.
-     *
-     * @return array<string, string>
-     */
-    protected function defaultHeaders(): array
-    {
-        return [
-            "Content-Type" => "application/x-www-form-urlencoded",
-        ];
-    }
-
-    /**
-     * Get the configured store ID.
-     *
-     * @return string The store ID.
-     */
     public function getStoreId(): string
     {
         return $this->storeId;

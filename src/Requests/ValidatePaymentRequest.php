@@ -16,7 +16,6 @@ namespace RaiyanSarker\SSLCommerz\Requests;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use RaiyanSarker\SSLCommerz\Responses\ValidationResponse;
-use RaiyanSarker\SSLCommerz\SSLCommerzConnector;
 
 /**
  * Class ValidatePaymentRequest

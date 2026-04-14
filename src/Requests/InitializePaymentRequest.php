@@ -19,7 +19,6 @@ use Saloon\Http\Request;
 use Saloon\Traits\Body\HasFormBody;
 use RaiyanSarker\SSLCommerz\Data\PaymentData;
 use RaiyanSarker\SSLCommerz\Responses\PaymentInitializationResponse;
-use RaiyanSarker\SSLCommerz\SSLCommerzConnector;
 
 /**
  * Class InitializePaymentRequest
@@ -79,11 +78,8 @@ class InitializePaymentRequest extends Request implements HasBody
      * @param string $storePassword The SSLCommerz store password.
      */
     public function __construct(
-        /** @var PaymentData */
         protected PaymentData $paymentData,
-        /** @var string */
         protected string $storeId,
-        /** @var string */
         protected string $storePassword,
     ) {
     }

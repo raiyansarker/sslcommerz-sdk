@@ -80,52 +80,29 @@ class PaymentData
      * @param string|null $valueD Optional extra reference value (value_d).
      */
     public function __construct(
-        /** @var float */
-        public float $totalAmount,
-        /** @var string */
-        public string $currency,
-        /** @var string */
-        public string $transactionId,
-        /** @var string */
-        public string $successUrl,
-        /** @var string */
-        public string $failUrl,
-        /** @var string */
-        public string $cancelUrl,
-        /** @var string */
-        public string $customerName,
-        /** @var string */
-        public string $customerEmail,
-        /** @var string */
-        public string $customerAddress1,
-        /** @var string */
-        public string $customerCity,
-        /** @var string */
-        public string $customerCountry,
-        /** @var string */
-        public string $customerPhone,
-        /** @var string */
-        public string $customerPostcode,
-        /** @var string */
-        public string $productName,
-        /** @var string */
-        public string $productCategory,
-        /** @var string */
-        public string $productProfile = 'general',
-        /** @var string */
-        public string $shippingMethod = 'NO',
-        /** @var string|null */
-        public ?string $ipnUrl = null,
-        /** @var string|null */
-        public ?string $multiCardName = null,
-        /** @var string|null */
-        public ?string $valueA = null,
-        /** @var string|null */
-        public ?string $valueB = null,
-        /** @var string|null */
-        public ?string $valueC = null,
-        /** @var string|null */
-        public ?string $valueD = null,
+        public readonly float $totalAmount,
+        public readonly string $currency,
+        public readonly string $transactionId,
+        public readonly string $successUrl,
+        public readonly string $failUrl,
+        public readonly string $cancelUrl,
+        public readonly string $customerName,
+        public readonly string $customerEmail,
+        public readonly string $customerAddress1,
+        public readonly string $customerCity,
+        public readonly string $customerCountry,
+        public readonly string $customerPhone,
+        public readonly string $customerPostcode,
+        public readonly string $productName,
+        public readonly string $productCategory,
+        public readonly string $productProfile = 'general',
+        public readonly string $shippingMethod = 'NO',
+        public readonly ?string $ipnUrl = null,
+        public readonly ?string $multiCardName = null,
+        public readonly ?string $valueA = null,
+        public readonly ?string $valueB = null,
+        public readonly ?string $valueC = null,
+        public readonly ?string $valueD = null,
     ) {
     }
 
