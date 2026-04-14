@@ -160,7 +160,18 @@ public function initiatePayment()
         totalAmount: 100.00,
         currency: 'BDT',
         transactionId: 'TXN_' . uniqid(),
-        // ... other required fields
+        successUrl: route('payment.success'),
+        failUrl: route('payment.fail'),
+        cancelUrl: route('payment.cancel'),
+        customerName: 'John Doe',
+        customerEmail: 'john@example.com',
+        customerAddress1: 'Dhaka',
+        customerCity: 'Dhaka',
+        customerCountry: 'Bangladesh',
+        customerPhone: '01700000000',
+        customerPostcode: '1207',
+        productName: 'Test Product',
+        productCategory: 'General',
     );
 
     $response = SSLCommerz::initializePayment($paymentData);
