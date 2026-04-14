@@ -109,4 +109,15 @@ class InitializePaymentRequest extends Request implements HasBody
             $this->storePassword
         );
     }
+
+    /**
+     * Prevent connector-level defaultQuery() from appending credentials
+     * to the URL of this POST request. Credentials are sent in the body only.
+     *
+     * @return array<string, mixed>
+     */
+    protected function defaultQuery(): array
+    {
+        return [];
+    }
 }
