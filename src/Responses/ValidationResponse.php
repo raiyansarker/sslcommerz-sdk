@@ -127,6 +127,28 @@ class ValidationResponse extends Response
         return is_string($value) ? $value : null;
     }
 
+    public function getCurrency(): ?string
+    {
+        $value = $this->json('currency');
+        return is_string($value) ? $value : null;
+    }
+
+    /**
+     * Get the risk level of the transaction.
+     * 0 = safe, 1 = risky. Always check before fulfilling an order.
+     */
+    public function getRiskLevel(): ?int
+    {
+        $value = $this->json('risk_level');
+        return is_numeric($value) ? (int) $value : null;
+    }
+
+    public function getRiskTitle(): ?string
+    {
+        $value = $this->json('risk_title');
+        return is_string($value) ? $value : null;
+    }
+
     /**
      * Get the full response data as an associative array.
      *

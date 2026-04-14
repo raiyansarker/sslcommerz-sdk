@@ -17,8 +17,7 @@ use RaiyanSarker\SSLCommerz\SSLCommerzConnector;
  * @method static \RaiyanSarker\SSLCommerz\Responses\RefundResponse refundTransaction(float $refundAmount, string $bankTransactionId, string $refundTransactionId, string $referenceTransactionId, string $refundRemarks = "")
  * @method static \RaiyanSarker\SSLCommerz\Responses\RefundStatusResponse queryRefundStatus(string $refundReferenceId)
  * @method static string getStoreId()
- * @method static string resolveBaseUrl()
- */
+ * @method static string resolveBaseUrl() */
 class SSLCommerz extends Facade
 {
     /**
