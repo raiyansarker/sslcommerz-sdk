@@ -146,6 +146,22 @@ it('can query transaction', function () {
         ->and($first['tran_id'])->toBe('TRANS_123');
 });
 
+it('can query transaction by session key', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'status' => 'VALID',
+            'tran_id' => 'TRANS_123',
+            'sessionkey' => 'SESSION_ABC',
+            'amount' => '100.00',
+        ], 200),
+    ]));
+
+    $response = $connector->queryTransactionBySessionKey('SESSION_ABC');
+
+    expect($response->getStatus())->toBe('VALID');
+});
+
 it('returns null for first transaction when none found', function () {
     $connector = makeConnector();
     $connector->withMockClient(new MockClient([
@@ -196,4 +212,40 @@ it('returns failed refund with error reason', function () {
     expect($response->isSuccess())->toBeFalse()
         ->and($response->getFailedReason())->toBe('Refund amount exceeds original transaction')
         ->and($response->getRefundReferenceId())->toBeNull();
+});
+
+it('can query refund status', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'APIConnect' => 'DONE',
+            'status' => 'refunded',
+            'refund_ref_id' => 'REFUND_REF_123',
+            'errorReason' => '',
+        ], 200),
+    ]));
+
+    $response = $connector->queryRefundStatus('REFUND_REF_123');
+
+    expect($response->isRefunded())->toBeTrue()
+        ->and($response->isProcessing())->toBeFalse()
+        ->and($response->getRefundReferenceId())->toBe('REFUND_REF_123')
+        ->and($response->getErrorReason())->toBeNull();
+});
+
+it('can query refund status while processing', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'APIConnect' => 'DONE',
+            'status' => 'processing',
+            'refund_ref_id' => 'REFUND_REF_123',
+            'errorReason' => '',
+        ], 200),
+    ]));
+
+    $response = $connector->queryRefundStatus('REFUND_REF_123');
+
+    expect($response->isRefunded())->toBeFalse()
+        ->and($response->isProcessing())->toBeTrue();
 });
