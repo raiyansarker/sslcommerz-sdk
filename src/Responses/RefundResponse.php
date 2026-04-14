@@ -54,7 +54,7 @@ class RefundResponse extends Response
      */
     public function isSuccess(): bool
     {
-        return $this->getStatus() === 'SUCCESS';
+        return $this->getStatus() === 'success';
     }
 
     /**
@@ -77,7 +77,7 @@ class RefundResponse extends Response
      */
     public function getFailedReason(): ?string
     {
-        $value = $this->json('failedreason');
+        $value = $this->json('errorReason');
         return is_string($value) ? $value : null;
     }
 

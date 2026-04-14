@@ -131,6 +131,7 @@ class SSLCommerzConnector extends Connector
      *
      * @param float $refundAmount The amount to be refunded.
      * @param string $bankTransactionId The bank transaction ID associated with the payment.
+     * @param string $refundTransactionId A unique transaction ID for this refund (required since 2025-02-24).
      * @param string $referenceTransactionId The reference (merchant) transaction ID.
      * @param string $refundRemarks Optional remarks for the refund request.
      * @return RefundResponse The response from the refund request.
@@ -141,6 +142,7 @@ class SSLCommerzConnector extends Connector
     public function refundTransaction(
         float $refundAmount,
         string $bankTransactionId,
+        string $refundTransactionId,
         string $referenceTransactionId,
         string $refundRemarks = "",
     ): RefundResponse {
@@ -149,6 +151,7 @@ class SSLCommerzConnector extends Connector
             new RefundTransactionRequest(
                 $refundAmount,
                 $bankTransactionId,
+                $refundTransactionId,
                 $referenceTransactionId,
                 $this->storeId,
                 $this->storePassword,
