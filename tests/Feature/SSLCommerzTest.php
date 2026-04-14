@@ -188,6 +188,36 @@ it('returns null for first transaction when none found', function () {
         ->and($response->getTransactionCount())->toBe(0);
 });
 
+it('reports failure when tran-id query APIConnect is not DONE', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'APIConnect' => 'FAILED',
+        ], 200),
+    ]));
+
+    $response = $connector->queryTransaction('TRANS_123');
+
+    expect($response->isSuccess())->toBeFalse()
+        ->and($response->getTransactionCount())->toBe(0)
+        ->and($response->getFirstTransaction())->toBeNull();
+});
+
+it('reports failure when session-key query APIConnect is not DONE', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'APIConnect' => 'INVALID_REQUEST',
+        ], 200),
+    ]));
+
+    $response = $connector->queryTransactionBySessionKey('BAD_SESSION');
+
+    expect($response->isSuccess())->toBeFalse()
+        ->and($response->getTransactionId())->toBeNull()
+        ->and($response->getAmount())->toBeNull();
+});
+
 // ── Refund ────────────────────────────────────────────────────────────────────
 
 it('can refund transaction', function () {
@@ -257,4 +287,20 @@ it('can query refund status while processing', function () {
 
     expect($response->isRefunded())->toBeFalse()
         ->and($response->isProcessing())->toBeTrue();
+});
+
+it('reports failure when refund status query APIConnect is not DONE', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'APIConnect' => 'INACTIVE',
+            'errorReason' => 'Store is inactive',
+        ], 200),
+    ]));
+
+    $response = $connector->queryRefundStatus('REFUND_REF_123');
+
+    expect($response->isRefunded())->toBeFalse()
+        ->and($response->isProcessing())->toBeFalse()
+        ->and($response->getErrorReason())->toBe('Store is inactive');
 });
