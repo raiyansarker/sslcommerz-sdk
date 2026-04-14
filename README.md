@@ -1,7 +1,7 @@
 # SSLCommerz PHP SDK
 
 > **⚠️ Experimental**
-> This package is under active development and has not been tested against the live SSLCommerz API. The implementation is based on the [official v4 documentation](https://developer.sslcommerz.com/doc/v4). Breaking changes may occur between releases. **Do not use in production without thorough testing against the real API in sandbox mode first.**
+> This package is under active development. The implementation is based on the [official v4 documentation](https://developer.sslcommerz.com/doc/v4) but has not been exhaustively tested against the live API. Breaking changes may occur between releases. **Test thoroughly in sandbox mode before deploying to production.**
 
 A modern, typesafe PHP SDK for [SSLCommerz](https://www.sslcommerz.com/) Payment Gateway, built on top of [Saloon PHP](https://docs.saloon.dev/).
 
