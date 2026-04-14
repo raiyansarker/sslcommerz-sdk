@@ -5,19 +5,16 @@ use Saloon\Http\Faking\MockResponse;
 use RaiyanSarker\SSLCommerz\Data\PaymentData;
 use RaiyanSarker\SSLCommerz\SSLCommerzConnector;
 
-it('can initialize payment', function () {
-    $mockClient = new MockClient([
-        'https://sandbox.sslcommerz.com/gwprocess/v4/api.php' => MockResponse::make([
-            'status' => 'SUCCESS',
-            'sessionkey' => 'F9E4A9F2D8B3C4E5F6A7B8C9D0E1F2A3',
-            'GatewayPageURL' => 'https://sandbox.sslcommerz.com/gwprocess/v4/gw.php?skey=F9E4A9F2D8B3C4E5F6A7B8C9D0E1F2A3',
-        ], 200),
-    ]);
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
-    $connector = new SSLCommerzConnector('test_store', 'test_password', true);
-    $connector->withMockClient($mockClient);
+function makeConnector(): SSLCommerzConnector
+{
+    return new SSLCommerzConnector('test_store', 'test_password', true);
+}
 
-    $paymentData = new PaymentData(
+function makePaymentData(): PaymentData
+{
+    return new PaymentData(
         totalAmount: 100.00,
         currency: 'BDT',
         transactionId: 'TRANS_123',
@@ -34,16 +31,49 @@ it('can initialize payment', function () {
         productName: 'Test Product',
         productCategory: 'General'
     );
+}
 
-    $response = $connector->initializePayment($paymentData);
+// ── Payment Initialization ────────────────────────────────────────────────────
+
+it('can initialize payment', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/gwprocess/v4/api.php' => MockResponse::make([
+            'status' => 'SUCCESS',
+            'sessionkey' => 'F9E4A9F2D8B3C4E5F6A7B8C9D0E1F2A3',
+            'GatewayPageURL' => 'https://sandbox.sslcommerz.com/gwprocess/v4/gw.php?skey=F9E4A9F2D8B3C4E5F6A7B8C9D0E1F2A3',
+        ], 200),
+    ]));
+
+    $response = $connector->initializePayment(makePaymentData());
 
     expect($response->isSuccess())->toBeTrue()
         ->and($response->getSessionKey())->toBe('F9E4A9F2D8B3C4E5F6A7B8C9D0E1F2A3')
         ->and($response->getGatewayPageURL())->toContain('skey=F9E4A9F2D8B3C4E5F6A7B8C9D0E1F2A3');
 });
 
+it('returns failed initialization', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/gwprocess/v4/api.php' => MockResponse::make([
+            'status' => 'FAILED',
+            'failedreason' => 'Invalid store credentials',
+        ], 200),
+    ]));
+
+    $response = $connector->initializePayment(makePaymentData());
+
+    expect($response->isSuccess())->toBeFalse()
+        ->and($response->getFailedReason())->toBe('Invalid store credentials')
+        ->and($response->getSessionKey())->toBeNull()
+        ->and($response->getGatewayPageURL())->toBeNull();
+});
+
+// ── Payment Validation ────────────────────────────────────────────────────────
+
 it('can validate payment', function () {
-    $mockClient = new MockClient([
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
         'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php*' => MockResponse::make([
             'status' => 'VALID',
             'tran_id' => 'TRANS_123',
@@ -51,62 +81,119 @@ it('can validate payment', function () {
             'bank_tran_id' => 'BANK_123',
             'val_id' => 'VAL_123',
         ], 200),
-    ]);
-
-    $connector = new SSLCommerzConnector('test_store', 'test_password', true);
-    $connector->withMockClient($mockClient);
+    ]));
 
     $response = $connector->validatePayment('VAL_123');
 
     expect($response->isValid())->toBeTrue()
         ->and($response->getTransactionId())->toBe('TRANS_123')
-        ->and($response->getAmount())->toBe(100.00);
+        ->and($response->getAmount())->toBe(100.00)
+        ->and($response->getBankTransactionId())->toBe('BANK_123')
+        ->and($response->getValId())->toBe('VAL_123');
 });
 
+it('treats VALIDATED status as valid', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php*' => MockResponse::make([
+            'status' => 'VALIDATED',
+            'tran_id' => 'TRANS_123',
+            'amount' => '100.00',
+        ], 200),
+    ]));
+
+    $response = $connector->validatePayment('VAL_123');
+
+    expect($response->isValid())->toBeTrue();
+});
+
+it('returns invalid validation', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php*' => MockResponse::make([
+            'status' => 'INVALID_TRANSACTION',
+        ], 200),
+    ]));
+
+    $response = $connector->validatePayment('BAD_VAL_ID');
+
+    expect($response->isValid())->toBeFalse()
+        ->and($response->getTransactionId())->toBeNull()
+        ->and($response->getAmount())->toBeNull();
+});
+
+// ── Transaction Query ─────────────────────────────────────────────────────────
+
 it('can query transaction', function () {
-    $mockClient = new MockClient([
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
         'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
             'status' => 'SUCCESS',
             'no_of_trans_found' => 1,
             'element' => [
-                [
-                    'tran_id' => 'TRANS_123',
-                    'status' => 'VALID',
-                    'amount' => '100.00',
-                ],
+                ['tran_id' => 'TRANS_123', 'status' => 'VALID', 'amount' => '100.00'],
             ],
         ], 200),
-    ]);
-
-    $connector = new SSLCommerzConnector('test_store', 'test_password', true);
-    $connector->withMockClient($mockClient);
+    ]));
 
     $response = $connector->queryTransaction('TRANS_123');
+    $first = $response->getFirstTransaction();
 
-    $firstTransaction = $response->getFirstTransaction();
-
-    assert($firstTransaction !== null);
+    assert($first !== null);
 
     expect($response->isSuccess())->toBeTrue()
         ->and($response->getTransactionCount())->toBe(1)
-        ->and($firstTransaction['tran_id'])->toBe('TRANS_123');
+        ->and($first['tran_id'])->toBe('TRANS_123');
 });
 
-it('can refund transaction', function () {
-    $mockClient = new MockClient([
-        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php' => MockResponse::make([
+it('returns null for first transaction when none found', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
             'status' => 'SUCCESS',
+            'no_of_trans_found' => 0,
+            'element' => [],
+        ], 200),
+    ]));
+
+    $response = $connector->queryTransaction('UNKNOWN');
+
+    expect($response->getFirstTransaction())->toBeNull()
+        ->and($response->getTransactions())->toBe([])
+        ->and($response->getTransactionCount())->toBe(0);
+});
+
+// ── Refund ────────────────────────────────────────────────────────────────────
+
+it('can refund transaction', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'status' => 'success',
             'refund_ref_id' => 'REFUND_123',
             'refund_amount' => '50.00',
         ], 200),
-    ]);
+    ]));
 
-    $connector = new SSLCommerzConnector('test_store', 'test_password', true);
-    $connector->withMockClient($mockClient);
-
-    $response = $connector->refundTransaction(50.00, 'BANK_123', 'TRANS_123');
+    $response = $connector->refundTransaction(50.00, 'BANK_123', 'REFUND_TRAN_123', 'TRANS_123');
 
     expect($response->isSuccess())->toBeTrue()
         ->and($response->getRefundReferenceId())->toBe('REFUND_123')
         ->and($response->getRefundAmount())->toBe(50.00);
+});
+
+it('returns failed refund with error reason', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'status' => 'failed',
+            'errorReason' => 'Refund amount exceeds original transaction',
+        ], 200),
+    ]));
+
+    $response = $connector->refundTransaction(999.00, 'BANK_123', 'REFUND_TRAN_123', 'TRANS_123');
+
+    expect($response->isSuccess())->toBeFalse()
+        ->and($response->getFailedReason())->toBe('Refund amount exceeds original transaction')
+        ->and($response->getRefundReferenceId())->toBeNull();
 });
