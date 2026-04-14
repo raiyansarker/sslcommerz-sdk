@@ -10,13 +10,13 @@
         }
     ],
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "saloonphp/saloon": "^4.0",
         "guzzlehttp/guzzle": "^7.8"
     },
     "require-dev": {
-        "orchestra/testbench": "^10.0",
-        "pestphp/pest": "^3.0",
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^4.0",
         "phpstan/phpstan": "^2.0"
     },
     "autoload": {
