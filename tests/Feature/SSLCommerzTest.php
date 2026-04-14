@@ -128,7 +128,7 @@ it('can query transaction', function () {
     $connector = makeConnector();
     $connector->withMockClient(new MockClient([
         'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
-            'status' => 'SUCCESS',
+            'APIConnect' => 'DONE',
             'no_of_trans_found' => 1,
             'element' => [
                 ['tran_id' => 'TRANS_123', 'status' => 'VALID', 'amount' => '100.00'],
@@ -150,23 +150,32 @@ it('can query transaction by session key', function () {
     $connector = makeConnector();
     $connector->withMockClient(new MockClient([
         'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'APIConnect' => 'DONE',
             'status' => 'VALID',
-            'tran_id' => 'TRANS_123',
             'sessionkey' => 'SESSION_ABC',
+            'tran_id' => 'TRANS_123',
+            'val_id' => 'VAL_123',
             'amount' => '100.00',
+            'store_amount' => '96.00',
+            'bank_tran_id' => 'BANK_123',
         ], 200),
     ]));
 
     $response = $connector->queryTransactionBySessionKey('SESSION_ABC');
 
-    expect($response->getStatus())->toBe('VALID');
+    expect($response->isSuccess())->toBeTrue()
+        ->and($response->getStatus())->toBe('VALID')
+        ->and($response->getTransactionId())->toBe('TRANS_123')
+        ->and($response->getAmount())->toBe(100.00)
+        ->and($response->getValId())->toBe('VAL_123')
+        ->and($response->getBankTransactionId())->toBe('BANK_123');
 });
 
 it('returns null for first transaction when none found', function () {
     $connector = makeConnector();
     $connector->withMockClient(new MockClient([
         'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
-            'status' => 'SUCCESS',
+            'APIConnect' => 'DONE',
             'no_of_trans_found' => 0,
             'element' => [],
         ], 200),
