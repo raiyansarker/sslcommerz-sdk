@@ -57,18 +57,6 @@ use Saloon\Http\Response;
 class TransactionQueryResponse extends Response
 {
     /**
-     * Get the status of the transaction query.
-     *
-     * @return string The status (e.g., 'SUCCESS', 'FAILED').
-     * @throws \JsonException If the response body could not be decoded as JSON.
-     */
-    public function getStatus(): string
-    {
-        $status = $this->json('status');
-        return is_scalar($status) ? (string) $status : '';
-    }
-
-    /**
      * Check if the transaction query was successful.
      *
      * @return bool True if successful, false otherwise.

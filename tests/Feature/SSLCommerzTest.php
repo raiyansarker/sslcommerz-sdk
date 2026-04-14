@@ -171,6 +171,28 @@ it('can query transaction by session key', function () {
         ->and($response->getBankTransactionId())->toBe('BANK_123');
 });
 
+it('can retrieve multiple transactions from query', function () {
+    $connector = makeConnector();
+    $connector->withMockClient(new MockClient([
+        'https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php*' => MockResponse::make([
+            'APIConnect' => 'DONE',
+            'no_of_trans_found' => 2,
+            'element' => [
+                ['tran_id' => 'TRANS_123', 'status' => 'VALID', 'amount' => '100.00'],
+                ['tran_id' => 'TRANS_123', 'status' => 'FAILED', 'amount' => '100.00'],
+            ],
+        ], 200),
+    ]));
+
+    $response = $connector->queryTransaction('TRANS_123');
+    $transactions = $response->getTransactions();
+
+    expect($response->getTransactionCount())->toBe(2)
+        ->and($transactions)->toHaveCount(2)
+        ->and($transactions[0]['status'])->toBe('VALID')
+        ->and($transactions[1]['status'])->toBe('FAILED');
+});
+
 it('returns null for first transaction when none found', function () {
     $connector = makeConnector();
     $connector->withMockClient(new MockClient([
