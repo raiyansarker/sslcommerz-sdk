@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "saloonphp/saloon": "^3.0",
+        "saloonphp/saloon": "^4.0",
         "guzzlehttp/guzzle": "^7.8"
     },
     "require-dev": {
@@ -31,7 +31,7 @@
     },
     "scripts": {
         "test": "vendor/bin/pest",
-        "stan": "vendor/bin/phpstan analyse",
+        "stan": "vendor/bin/phpstan analyse --memory-limit=256M",
         "all": [
             "@stan",
             "@test"
