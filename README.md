@@ -7,10 +7,10 @@ A modern, typesafe PHP SDK for [SSLCommerz](https://www.sslcommerz.com/) Payment
 
 ## Features
 
-- **Modern PHP**: Requires PHP 8.2 or higher.
+- **Modern PHP**: Requires PHP 8.3 or higher.
 - **Typesafe**: Uses DTOs and custom response classes.
-- **Saloon PHP**: Leverages the power of Saloon for API requests.
-- **Testing**: Built-in support for mocking and testing with [Pest](https://pestphp.com/).
+- **Saloon PHP**: Leverages the power of [Saloon v4](https://docs.saloon.dev/) for API requests.
+- **Testing**: Built-in support for mocking and testing with [Pest v4](https://pestphp.com/).
 - **PHPStan**: Analyzed at `max` level for maximum reliability.
 
 ## Installation
