@@ -76,7 +76,8 @@ class TransactionQueryResponse extends Response
      */
     public function isSuccess(): bool
     {
-        return $this->getStatus() === 'SUCCESS';
+        $connect = $this->json('APIConnect');
+        return is_string($connect) && $connect === 'DONE';
     }
 
     /**
