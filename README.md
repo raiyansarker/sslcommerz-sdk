@@ -93,6 +93,7 @@ if ($response->isSuccess()) {
 $response = $connector->refundTransaction(
     refundAmount: 50.00,
     bankTransactionId: 'BANK_TRAN_ID',
+    refundTransactionId: 'REFUND_TRAN_' . uniqid(),
     referenceTransactionId: 'TRANS_123456',
     refundRemarks: 'Customer requested refund'
 );
