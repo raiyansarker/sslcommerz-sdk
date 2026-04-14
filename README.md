@@ -70,11 +70,22 @@ if ($response->isSuccess()) {
 
 ```php
 $valId = $_POST['val_id']; // From SSLCommerz callback
+
+// ⚠️ Never trust the raw POST data from SSLCommerz callbacks directly.
+// Always validate the val_id against the SSLCommerz Validation API.
 $response = $connector->validatePayment($valId);
 
 if ($response->isValid()) {
+    // ⚠️ Always verify the amount and currency match your order records.
     $transactionId = $response->getTransactionId();
     $amount = $response->getAmount();
+    $currency = $response->getCurrency();
+
+    // ⚠️ Check risk level before fulfilling. 0 = safe, 1 = risky.
+    if ($response->getRiskLevel() === 1) {
+        // Hold the order and review manually
+    }
+
     // Update your database
 }
 ```
@@ -264,6 +275,13 @@ class PaymentController extends Controller
         $response = SSLCommerz::validatePayment($validationId);
 
         if ($response->isValid()) {
+            // ⚠️ Always verify amount and currency match your order records.
+            // ⚠️ Check risk level before fulfilling. 0 = safe, 1 = risky.
+            if ($response->getRiskLevel() === 1) {
+                // Hold the order and review manually
+                return redirect()->route('checkout')->with('error', 'Payment is under review.');
+            }
+
             $transactionId = $response->getTransactionId();
             // Update your database, mark order as paid
             return redirect()->route('order.complete', ['id' => $transactionId]);
