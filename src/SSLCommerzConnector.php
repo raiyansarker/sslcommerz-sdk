@@ -17,11 +17,14 @@ use Saloon\Http\Connector;
 use Saloon\Traits\Plugins\AcceptsJson;
 use RaiyanSarker\SSLCommerz\Data\PaymentData;
 use RaiyanSarker\SSLCommerz\Requests\InitializePaymentRequest;
+use RaiyanSarker\SSLCommerz\Requests\RefundStatusRequest;
 use RaiyanSarker\SSLCommerz\Requests\RefundTransactionRequest;
+use RaiyanSarker\SSLCommerz\Requests\TransactionQueryBySessionRequest;
 use RaiyanSarker\SSLCommerz\Requests\TransactionQueryRequest;
 use RaiyanSarker\SSLCommerz\Requests\ValidatePaymentRequest;
 use RaiyanSarker\SSLCommerz\Responses\PaymentInitializationResponse;
 use RaiyanSarker\SSLCommerz\Responses\RefundResponse;
+use RaiyanSarker\SSLCommerz\Responses\RefundStatusResponse;
 use RaiyanSarker\SSLCommerz\Responses\TransactionQueryResponse;
 use RaiyanSarker\SSLCommerz\Responses\ValidationResponse;
 
@@ -93,13 +96,7 @@ class SSLCommerzConnector extends Connector
     public function validatePayment(string $validationId): ValidationResponse
     {
         /** @var ValidationResponse */
-        return $this->send(
-            new ValidatePaymentRequest(
-                $validationId,
-                $this->storeId,
-                $this->storePassword,
-            ),
-        );
+        return $this->send(new ValidatePaymentRequest($validationId));
     }
 
     /**
@@ -113,17 +110,16 @@ class SSLCommerzConnector extends Connector
      * @throws \Saloon\Exceptions\Request\FatalRequestException If a fatal error occurs during the request (e.g., connection timeout).
      * @throws \LogicException If the request could not be sent.
      */
-    public function queryTransaction(
-        string $transactionId,
-    ): TransactionQueryResponse {
+    public function queryTransaction(string $transactionId): TransactionQueryResponse
+    {
         /** @var TransactionQueryResponse */
-        return $this->send(
-            new TransactionQueryRequest(
-                $transactionId,
-                $this->storeId,
-                $this->storePassword,
-            ),
-        );
+        return $this->send(new TransactionQueryRequest($transactionId));
+    }
+
+    public function queryTransactionBySessionKey(string $sessionKey): TransactionQueryResponse
+    {
+        /** @var TransactionQueryResponse */
+        return $this->send(new TransactionQueryBySessionRequest($sessionKey));
     }
 
     /**
@@ -153,8 +149,6 @@ class SSLCommerzConnector extends Connector
                 $bankTransactionId,
                 $refundTransactionId,
                 $referenceTransactionId,
-                $this->storeId,
-                $this->storePassword,
                 $refundRemarks,
             ),
         );
@@ -181,7 +175,10 @@ class SSLCommerzConnector extends Connector
      */
     protected function defaultQuery(): array
     {
-        return [];
+        return [
+            'store_id' => $this->storeId,
+            'store_passwd' => $this->storePassword,
+        ];
     }
 
     /**
@@ -208,13 +205,9 @@ class SSLCommerzConnector extends Connector
         return $this->storeId;
     }
 
-    /**
-     * Get the configured store password.
-     *
-     * @return string The store password.
-     */
-    public function getStorePassword(): string
+    public function queryRefundStatus(string $refundReferenceId): RefundStatusResponse
     {
-        return $this->storePassword;
+        /** @var RefundStatusResponse */
+        return $this->send(new RefundStatusRequest($refundReferenceId));
     }
 }

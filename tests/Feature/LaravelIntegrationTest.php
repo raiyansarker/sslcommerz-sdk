@@ -20,7 +20,6 @@ test('it can resolve the connector from the container', function () {
 
     expect($connector)->toBeInstanceOf(SSLCommerzConnector::class);
     expect($connector->getStoreId())->toBe('test_store_id');
-    expect($connector->getStorePassword())->toBe('test_store_password');
     expect($connector->resolveBaseUrl())->toBe('https://sandbox.sslcommerz.com');
 });
 

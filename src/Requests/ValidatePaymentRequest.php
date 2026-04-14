@@ -45,44 +45,20 @@ class ValidatePaymentRequest extends Request
      */
     protected ?string $response = ValidationResponse::class;
 
-    /**
-     * Constructor for ValidatePaymentRequest.
-     *
-     * @param string $validationId The SSLCommerz validation ID (val_id) provided in the payment callback.
-     * @param string $storeId The SSLCommerz store ID.
-     * @param string $storePassword The SSLCommerz store password.
-     */
     public function __construct(
-        /** @var string */
         protected string $validationId,
-        /** @var string */
-        protected string $storeId,
-        /** @var string */
-        protected string $storePassword,
     ) {
     }
 
-    /**
-     * Resolve the API endpoint for payment validation.
-     *
-     * @return string The endpoint path.
-     */
     public function resolveEndpoint(): string
     {
         return '/validator/api/validationserverAPI.php';
     }
 
-    /**
-     * Define the default query parameters for the request.
-     *
-     * @return ValidationQueryParameters The formatted query parameters.
-     */
     protected function defaultQuery(): array
     {
         return [
             'val_id' => $this->validationId,
-            'store_id' => $this->storeId,
-            'store_passwd' => $this->storePassword,
             'format' => 'json',
         ];
     }

@@ -31,8 +31,6 @@ class RefundTransactionRequest extends Request
         protected string $bankTransactionId,
         protected string $refundTransactionId,
         protected string $referenceTransactionId,
-        protected string $storeId,
-        protected string $storePassword,
         protected string $refundRemarks = '',
     ) {
     }
@@ -53,8 +51,6 @@ class RefundTransactionRequest extends Request
             'refund_amount' => number_format($this->refundAmount, 2, '.', ''),
             'refund_remarks' => $this->refundRemarks,
             'refe_id' => $this->referenceTransactionId,
-            'store_id' => $this->storeId,
-            'store_passwd' => $this->storePassword,
             'format' => 'json',
         ];
     }
