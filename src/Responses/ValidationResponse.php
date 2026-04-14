@@ -76,7 +76,7 @@ class ValidationResponse extends Response
      */
     public function isValid(): bool
     {
-        return $this->getStatus() === 'VALID';
+        return in_array($this->getStatus(), ['VALID', 'VALIDATED'], true);
     }
 
     /**
