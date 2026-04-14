@@ -13,7 +13,7 @@ use RaiyanSarker\SSLCommerz\SSLCommerzConnector;
  * @method static \RaiyanSarker\SSLCommerz\Responses\PaymentInitializationResponse initializePayment(\RaiyanSarker\SSLCommerz\Data\PaymentData $paymentData)
  * @method static \RaiyanSarker\SSLCommerz\Responses\ValidationResponse validatePayment(string $validationId)
  * @method static \RaiyanSarker\SSLCommerz\Responses\TransactionQueryResponse queryTransaction(string $transactionId)
- * @method static \RaiyanSarker\SSLCommerz\Responses\TransactionQueryResponse queryTransactionBySessionKey(string $sessionKey)
+ * @method static \RaiyanSarker\SSLCommerz\Responses\TransactionQueryBySessionResponse queryTransactionBySessionKey(string $sessionKey)
  * @method static \RaiyanSarker\SSLCommerz\Responses\RefundResponse refundTransaction(float $refundAmount, string $bankTransactionId, string $refundTransactionId, string $referenceTransactionId, string $refundRemarks = "")
  * @method static \RaiyanSarker\SSLCommerz\Responses\RefundStatusResponse queryRefundStatus(string $refundReferenceId)
  * @method static string getStoreId()

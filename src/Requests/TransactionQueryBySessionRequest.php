@@ -6,13 +6,13 @@ namespace RaiyanSarker\SSLCommerz\Requests;
 
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
-use RaiyanSarker\SSLCommerz\Responses\TransactionQueryResponse;
+use RaiyanSarker\SSLCommerz\Responses\TransactionQueryBySessionResponse;
 
 class TransactionQueryBySessionRequest extends Request
 {
     protected Method $method = Method::GET;
 
-    protected ?string $response = TransactionQueryResponse::class;
+    protected ?string $response = TransactionQueryBySessionResponse::class;
 
     public function __construct(
         protected string $sessionKey,

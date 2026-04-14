@@ -25,6 +25,7 @@ use RaiyanSarker\SSLCommerz\Requests\ValidatePaymentRequest;
 use RaiyanSarker\SSLCommerz\Responses\PaymentInitializationResponse;
 use RaiyanSarker\SSLCommerz\Responses\RefundResponse;
 use RaiyanSarker\SSLCommerz\Responses\RefundStatusResponse;
+use RaiyanSarker\SSLCommerz\Responses\TransactionQueryBySessionResponse;
 use RaiyanSarker\SSLCommerz\Responses\TransactionQueryResponse;
 use RaiyanSarker\SSLCommerz\Responses\ValidationResponse;
 
@@ -113,9 +114,9 @@ class SSLCommerzConnector extends Connector
         return $this->send(new TransactionQueryRequest($transactionId));
     }
 
-    public function queryTransactionBySessionKey(string $sessionKey): TransactionQueryResponse
+    public function queryTransactionBySessionKey(string $sessionKey): TransactionQueryBySessionResponse
     {
-        /** @var TransactionQueryResponse */
+        /** @var TransactionQueryBySessionResponse */
         return $this->send(new TransactionQueryBySessionRequest($sessionKey));
     }
 
