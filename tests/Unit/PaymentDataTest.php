@@ -81,9 +81,12 @@ it('includes optional fields when provided', function () {
         valueA: 'ref_a',
     );
 
+    /** @var array<string, string> $array */
     $array = $paymentData->toArray('store', 'pass');
 
-    expect($array['ipn_url'])->toBe('https://example.com/ipn')
+    expect($array)->toHaveKey('ipn_url')
+        ->and($array['ipn_url'])->toBe('https://example.com/ipn')
+        ->and($array)->toHaveKey('value_a')
         ->and($array['value_a'])->toBe('ref_a')
         ->and($array)->not->toHaveKey('value_b');
 });

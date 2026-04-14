@@ -15,8 +15,6 @@ use RaiyanSarker\SSLCommerz\Responses\RefundResponse;
  *     refund_amount: string,
  *     refund_remarks: string,
  *     refe_id: string,
- *     store_id: string,
- *     store_passwd: string,
  *     format: string
  * }
  */
